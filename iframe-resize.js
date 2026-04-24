@@ -32,13 +32,27 @@
     } catch (e) { /* noop */ }
   }
 
+  // Force a post even if the height hasn't changed (used to reply to parent requests)
+  function forcePost(reason) {
+    lastHeight = 0;
+    post(reason);
+  }
+
+  // Listen for parent requesting a height post (covers race where parent's
+  // listener is attached after the iframe's initial posts).
+  window.addEventListener('message', function(e){
+    if (e.data && e.data.type === 'cf-iframe-request-height') forcePost('requested');
+  });
+
   // Initial + after full load (images, fonts)
   function init() {
     post('init');
-    // Re-measure a few times as late fonts/images settle
-    setTimeout(function(){ post('delay-120'); }, 120);
-    setTimeout(function(){ post('delay-450'); }, 450);
-    setTimeout(function(){ post('delay-1200'); }, 1200);
+    // Re-measure a few times as late fonts/images settle. Force-post so parent
+    // (which may attach its listener after the page's first paint) still gets one.
+    setTimeout(function(){ forcePost('delay-120'); }, 120);
+    setTimeout(function(){ forcePost('delay-450'); }, 450);
+    setTimeout(function(){ forcePost('delay-1200'); }, 1200);
+    setTimeout(function(){ forcePost('delay-2500'); }, 2500);
   }
 
   if (document.readyState === 'complete') {
