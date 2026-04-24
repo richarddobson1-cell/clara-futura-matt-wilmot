@@ -361,25 +361,53 @@ nav {
   padding-left: 26px;
   margin: 8px 0 0;
 }
+/* Base (dim) line — always visible */
 .tl::before {
   content: '';
   position: absolute;
   left: 8px; top: 6px; bottom: 6px;
   width: 1px;
-  background: rgba(242, 181, 77, 0.3);
+  background: rgba(242, 181, 77, 0.22);
+}
+/* Progress (bright) line — height animated by JS via CSS custom property */
+.tl::after {
+  content: '';
+  position: absolute;
+  left: 7px; top: 6px;
+  width: 3px;
+  height: var(--tl-progress, 0px);
+  background: linear-gradient(180deg, rgba(242,181,77,0) 0%, rgba(242,181,77,0.95) 18%, rgba(242,181,77,1) 100%);
+  box-shadow: 0 0 12px rgba(242,181,77,0.7), 0 0 28px rgba(242,181,77,0.35);
+  border-radius: 2px;
+  pointer-events: none;
+  transition: height 0.08s linear;
+  will-change: height;
 }
 .tl-item {
   position: relative;
-  padding: 10px 0 26px;
+  padding: 14px 16px 18px 18px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  transition: transform 0.4s var(--ease-out), background 0.35s ease, border-color 0.35s ease, box-shadow 0.5s ease;
 }
 .tl-item::before {
   content: '';
   position: absolute;
-  left: -22px; top: 18px;
+  left: -4px; top: 22px;
   width: 9px; height: 9px;
   border-radius: 50%;
+  background: rgba(242, 181, 77, 0.4);
+  box-shadow: 0 0 0 4px rgba(242, 181, 77, 0.08);
+  transition: background 0.35s ease, box-shadow 0.45s ease, transform 0.4s var(--ease-out);
+  z-index: 2;
+}
+/* Lit dot as the progress line reaches it */
+.tl-item.is-lit::before {
   background: var(--amber);
-  box-shadow: 0 0 0 4px rgba(242, 181, 77, 0.15);
+  box-shadow: 0 0 0 4px rgba(242,181,77,0.22), 0 0 14px rgba(242,181,77,0.85), 0 0 28px rgba(242,181,77,0.45);
+  transform: scale(1.15);
 }
 .tl-date {
   font-size: 0.72rem;
@@ -391,7 +419,64 @@ nav {
 }
 .tl-org { font-size: 1rem; font-weight: 500; color: var(--cream); margin-bottom: 2px; }
 .tl-role { font-size: 0.875rem; color: var(--muted); margin-bottom: 10px; font-style: italic; }
-.tl-desc { font-size: 0.92rem; color: var(--cream); opacity: 0.86; line-height: 1.72; font-weight: 300; }
+
+/* Description: 2-line clamp, expand on hover/focus/tap (adds .is-open) */
+.tl-desc {
+  font-size: 0.92rem;
+  color: var(--cream);
+  opacity: 0.86;
+  line-height: 1.72;
+  font-weight: 300;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  position: relative;
+  cursor: pointer;
+  padding-right: 2px;
+  transition: opacity 0.35s ease, color 0.35s ease, text-shadow 0.45s ease;
+}
+/* Fade mask hint that text is clamped */
+.tl-desc::after {
+  content: '';
+  position: absolute;
+  right: 0; bottom: 0;
+  width: 60px; height: 1.72em;
+  background: linear-gradient(90deg, rgba(12,33,55,0) 0%, rgba(12,33,55,0.85) 70%, rgba(12,33,55,1) 100%);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+.tl-item:hover .tl-desc,
+.tl-item:focus-within .tl-desc,
+.tl-desc.is-open {
+  -webkit-line-clamp: unset;
+  display: block;
+  opacity: 1;
+  color: #F7ECD4;
+  text-shadow: 0 0 14px rgba(242,181,77,0.18);
+}
+.tl-item:hover .tl-desc::after,
+.tl-item:focus-within .tl-desc::after,
+.tl-desc.is-open::after { opacity: 0; }
+.tl-item:hover,
+.tl-item:focus-within {
+  transform: translateX(2px);
+  background: linear-gradient(135deg, rgba(242,181,77,0.07) 0%, rgba(12,33,55,0.55) 60%, rgba(12,33,55,0.3) 100%);
+  border-color: rgba(242,181,77,0.45);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(242,181,77,0.25), 0 0 28px rgba(242,181,77,0.25), inset 0 0 22px rgba(242,181,77,0.08);
+}
+.tl-item:hover::before,
+.tl-item:focus-within::before {
+  background: var(--amber);
+  box-shadow: 0 0 0 4px rgba(242,181,77,0.25), 0 0 18px rgba(242,181,77,0.95), 0 0 34px rgba(242,181,77,0.5);
+  transform: scale(1.2);
+}
+.tl-desc:focus-visible { outline: 2px solid rgba(242,181,77,0.6); outline-offset: 4px; border-radius: 4px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tl::after, .tl-item, .tl-item::before, .tl-desc, .tl-desc::after { transition: none !important; }
+}
 
 /* Qualifications list */
 .qual-list { list-style: none; padding: 0; margin: 0; }
