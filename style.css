@@ -539,6 +539,68 @@ footer {
   .tr-n { font-size: 1.75rem; }
 }
 
+/* ===== Custom cursor: amber ring + dot ===== */
+.cf-cursor {
+  position: fixed;
+  top: 0; left: 0;
+  width: 36px; height: 36px;
+  margin-left: -18px; margin-top: -18px;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.2s var(--ease-out), width 0.25s var(--ease-out), height 0.25s var(--ease-out), margin 0.25s var(--ease-out);
+  mix-blend-mode: normal;
+  will-change: transform;
+}
+.cf-cursor::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--amber);
+  box-shadow: 0 0 18px rgba(242, 181, 77, 0.35), inset 0 0 10px rgba(242, 181, 77, 0.12);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+}
+.cf-cursor::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 4px; height: 4px;
+  margin: -2px 0 0 -2px;
+  background: var(--amber);
+  border-radius: 50%;
+  box-shadow: 0 0 6px rgba(242, 181, 77, 0.7);
+  transition: width 0.2s ease, height 0.2s ease, margin 0.2s ease, background 0.2s ease;
+}
+.cf-cursor.is-on { opacity: 1; }
+/* On hover over interactive items, expand the ring and fill the dot */
+.cf-cursor.is-hover {
+  width: 54px; height: 54px;
+  margin-left: -27px; margin-top: -27px;
+}
+.cf-cursor.is-hover::before {
+  border-color: var(--amber);
+  background: rgba(242, 181, 77, 0.08);
+  box-shadow: 0 0 26px rgba(242, 181, 77, 0.55), inset 0 0 14px rgba(242, 181, 77, 0.2);
+}
+.cf-cursor.is-hover::after {
+  width: 6px; height: 6px; margin: -3px 0 0 -3px;
+}
+/* On click press, briefly shrink */
+.cf-cursor.is-down {
+  transform: scale(0.82);
+}
+/* Hide the native cursor only when custom is active */
+html.cf-has-cursor, html.cf-has-cursor body { cursor: none; }
+html.cf-has-cursor a,
+html.cf-has-cursor button,
+html.cf-has-cursor [role="button"],
+html.cf-has-cursor .acc-hd { cursor: none; }
+/* Disable on coarse pointers (touch) */
+@media (hover: none), (pointer: coarse) {
+  .cf-cursor { display: none !important; }
+  html.cf-has-cursor, html.cf-has-cursor body { cursor: auto !important; }
+}
+
 /* ===== Reduced motion ===== */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
