@@ -14,13 +14,30 @@
   var MIN_DELTA = 4; // ignore sub-pixel jitter
 
   function measure() {
-    var de = document.documentElement;
-    var b = document.body;
-    var h = Math.max(
-      de.scrollHeight, de.offsetHeight,
-      b ? b.scrollHeight : 0, b ? b.offsetHeight : 0
-    );
-    return Math.ceil(h);
+    // Measure the bottom of the furthest visible content element.
+    // Using scrollHeight is unreliable because an iframe with a fixed height
+    // attribute can cause the body to stretch to fill that height.
+    var candidates = [
+      document.querySelector('footer'),
+      document.querySelector('main'),
+      document.body && document.body.lastElementChild
+    ].filter(Boolean);
+    var maxBottom = 0;
+    for (var i = 0; i < candidates.length; i++) {
+      var r = candidates[i].getBoundingClientRect();
+      var bottom = r.bottom + window.pageYOffset;
+      if (bottom > maxBottom) maxBottom = bottom;
+    }
+    // Fallback: use children bounding bottoms on body
+    if (maxBottom < 200 && document.body) {
+      var kids = document.body.children;
+      for (var k = 0; k < kids.length; k++) {
+        var kr = kids[k].getBoundingClientRect();
+        var kb = kr.bottom + window.pageYOffset;
+        if (kb > maxBottom) maxBottom = kb;
+      }
+    }
+    return Math.ceil(maxBottom);
   }
 
   function post(reason) {
