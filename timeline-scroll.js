@@ -36,6 +36,12 @@
       pulse = document.createElement('span');
       pulse.className = 'tl-pulse';
       pulse.setAttribute('aria-hidden', 'true');
+      var halo = document.createElement('span');
+      halo.className = 'tl-pulse-halo';
+      var core = document.createElement('span');
+      core.className = 'tl-pulse-core';
+      pulse.appendChild(halo);
+      pulse.appendChild(core);
       tl.appendChild(pulse);
     }
 
