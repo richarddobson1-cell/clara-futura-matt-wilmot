@@ -30,6 +30,37 @@
     var items = tl.querySelectorAll('.tl-item');
     var ticking = false;
 
+    // Inject the traveling pulse element once per timeline
+    var pulse = tl.querySelector('.tl-pulse');
+    if (!pulse && !reduced) {
+      pulse = document.createElement('span');
+      pulse.className = 'tl-pulse';
+      pulse.setAttribute('aria-hidden', 'true');
+      tl.appendChild(pulse);
+    }
+
+    function refreshPulseTrack() {
+      if (!pulse) return;
+      // Travel distance = full timeline height minus pulse size and a small margin
+      var track = Math.max(0, tl.clientHeight - 24);
+      tl.style.setProperty('--tl-track', track + 'px');
+    }
+
+    function ensurePulseVisible() {
+      if (!pulse || reduced) return;
+      var rect = tl.getBoundingClientRect();
+      var vh = window.innerHeight || document.documentElement.clientHeight;
+      var inView = rect.bottom > 40 && rect.top < vh - 40;
+      if (inView) {
+        if (!pulse.classList.contains('is-running')) {
+          refreshPulseTrack();
+          pulse.classList.add('is-running');
+        }
+      } else {
+        pulse.classList.remove('is-running');
+      }
+    }
+
     function update() {
       ticking = false;
       var rect = tl.getBoundingClientRect();
@@ -59,6 +90,8 @@
           if (item.classList.contains('is-lit')) item.classList.remove('is-lit');
         }
       });
+
+      ensurePulseVisible();
     }
 
     function onScroll() {
@@ -77,13 +110,22 @@
       var btn = acc.querySelector('.acc-hd');
       if (btn) btn.addEventListener('click', function () {
         // wait for accordion expand animation, then update
-        setTimeout(update, 60);
-        setTimeout(update, 360);
-        setTimeout(update, 720);
+        setTimeout(function(){ refreshPulseTrack(); update(); }, 60);
+        setTimeout(function(){ refreshPulseTrack(); update(); }, 360);
+        setTimeout(function(){ refreshPulseTrack(); update(); }, 720);
       });
     }
 
+    // Refresh travel distance whenever the timeline resizes (e.g. tap-to-expand description)
+    if (!reduced && typeof ResizeObserver !== 'undefined') {
+      var ro = new ResizeObserver(function () {
+        refreshPulseTrack();
+      });
+      ro.observe(tl);
+    }
+
     // Initial paint
+    refreshPulseTrack();
     update();
   }
 
