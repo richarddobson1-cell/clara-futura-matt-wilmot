@@ -4,6 +4,12 @@
 (function () {
   if (typeof window === 'undefined') return;
 
+  // Skip in iframe — parent already renders the WP cursor; running both
+  // floods every mousemove with double work and causes visible lag.
+  var inIframe = false;
+  try { inIframe = window.self !== window.top; } catch (e) { inIframe = true; }
+  if (inIframe) return;
+
   // Skip on touch / coarse pointers
   var coarse = window.matchMedia && (
     window.matchMedia('(hover: none)').matches ||
